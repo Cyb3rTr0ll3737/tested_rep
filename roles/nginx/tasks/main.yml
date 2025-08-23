@@ -16,6 +16,14 @@
   register: nginx_check
   failed_when: nginx_check.rc != 0
 
+- name: Удаляем дефотные конфиги
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+   - /etc/nginx/sites-available/default
+   - /etc/nginx/sites-enabled/default
+
 - name: Ребутаем нжинкс
   become: true
   ansible.builtin.service:
