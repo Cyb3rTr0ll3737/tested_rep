@@ -1,0 +1,5 @@
+---
+nginx_vars:
+  nginx_site: mysite
+  nginx_server_name: example.com
+  nginx_root: /var/www/html

@@ -1,0 +1,16 @@
+---
+- name: Подкидываем файл в /etc/ssh/sshd_config.d/ с нужными нам запретами
+  become: true
+  ansible.builtin.template:
+    src: sshd_include.j2
+    dest: /etc/ssh/sshd_config.d/sshd_include.conf
+    owner: root
+    group: root
+    mode: '0600'
+
+# Рестартить не буду, по причине того, что контейнер умрёт
+# - name: Перезапуск sshd
+#   become: true
+#   ansible.builtin.service:
+#     name: ssh
+#     state: restarted

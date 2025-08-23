@@ -1,0 +1,32 @@
+---
+useradd_groups:
+  - devops
+  - dev
+
+useradd_user:
+  - name: testuser
+    shell: /bin/bash
+    state: present
+    password: "$6$kTDZCnxstAo5yoCs$Orf0tP2tlTxxC3pwXR3.wMt0q4g/7IW2IcpQuy3EGFR4rM3E7vJWK4K8nxROiwfMncIoM5vYSuQMQKC/YN17c0"
+    groups:
+      - devops
+      - dev
+    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAIQCYvUhsO0aIvBfveWMTevPuA4a8EO2cYMmhc2PLvmDKEQ== rsa-key-20250823"
+
+  - name: testuser25
+    shell: /bin/zsh
+    state: present
+    password: "$6$kTDZCnxstAo5yoCs$Orf0tP2tlTxxC3pwXR3.wMt0q4g/7IW2IcpQuy3EGFR4rM3E7vJWK4K8nxROiwfMncIoM5vYSuQMQKC/YN17c0"
+    groups:
+      - devops
+      - dev
+    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAIQCYvUhsO0aIvBfveWMTevPuA4a8EO2cYMmhc2PLvmDKEQ== rsa-key-20250823"
+
+  - name: testuser93
+    shell: /bin/zsh
+    state: present
+    password: "$6$kTDZCnxstAo5yoCs$Orf0tP2tlTxxC3pwXR3.wMt0q4g/7IW2IcpQuy3EGFR4rM3E7vJWK4K8nxROiwfMncIoM5vYSuQMQKC/YN17c0"
+    groups:
+      - devops
+      - dev
+    ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAIQCYvUhsO0aIvBfveWMTevPuA4a8EO2cYMmhc2PLvmDKEQ== rsa-key-20250823"

@@ -1,0 +1,99 @@
+---
+- name: Получаем всех пользователей системы
+  ansible.builtin.shell: "getent passwd"
+  register: passwd_output
+  changed_when: false
+
+- name: Превращаем в список словарей
+  ansible.builtin.set_fact:
+    all_users: >-
+      {{
+        passwd_output.stdout_lines
+        | map('split', ':')
+        | map('zip', ['name','x','uid','gid','gcos','dir','shell'])
+        | map('map', 'reverse')
+        | map('community.general.dict')
+        | list
+      }}
+
+- name: Фильтруем пользователей, которые используют zsh
+  ansible.builtin.set_fact:
+    zsh_users: >-
+      {{
+        all_users
+        | selectattr('shell', 'defined')
+        | selectattr('shell', 'equalto', '/bin/zsh')
+        | list
+      }}
+
+- name: Проверяем, есть ли .oh-my-zsh
+  ansible.builtin.stat:
+    path: "{{ item.dir }}/.oh-my-zsh"
+  register: ohmyzsh_stat
+  loop: "{{ zsh_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Устанавливаем oh-my-zsh для юзеров, которые используют zsh
+  become: true
+  ansible.builtin.git:
+    repo: "{{ zsh_install_vars.ohmyzsh_repo }}"
+    dest: "{{ item.item.dir }}/.oh-my-zsh"
+    version: master
+  loop: "{{ ohmyzsh_stat.results | selectattr('stat.exists', 'equalto', false) | list }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Копируем шаблон .zshrc
+  ansible.builtin.template:
+    src: zshrc.j2
+    dest: "{{ item.item.dir }}/.zshrc"
+    owner: "{{ item.item.name }}"
+    group: "{{ item.item.name }}"
+    mode: "0644"
+  loop: "{{ ohmyzsh_stat.results | selectattr('stat.exists', 'equalto', false) | list }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Клонируем тему powerlevel10k
+  become: true
+  ansible.builtin.git:
+    repo: "{{ zsh_install_vars.powerlevel10_repo }}"
+    dest: "{{ item.item.dir }}/.oh-my-zsh/custom/themes/powerlevel10k"
+    version: master
+  loop: "{{ ohmyzsh_stat.results | selectattr('stat.exists', 'equalto', false) | list }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+# Костылирую права, из-за проклятого WSL, который не хочет клонировать через become_user
+- name: Устанавливаем права на директорию oh-my-zsh для юзеров
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.dir }}/.oh-my-zsh"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    recurse: true
+  loop: "{{ zsh_users }}"
+
+- name: Создаём директорию для кастомных шрифтов
+  become: true
+  ansible.builtin.file:
+    path: "/usr/share/fonts/truetype/"
+    state: directory
+    mode: '0755'
+
+- name: Скачиваем шрифты, необходимые для powerlevel10k
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "/usr/share/fonts/truetype/{{ item.filename }}"
+    mode: "0644"
+  loop:
+    - { url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf", filename: "MesloLGSNF-Regular.ttf"}
+    - { url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf", filename: "MesloLGSNF-Bold.ttf"}
+    - { url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf", filename: "MesloLGSNF-Italic.ttf"}
+    - { url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf", filename: "MesloLGSNF-BoldItalic.ttf"}
+
+- name: Обновляем шрифты
+  become: true
+  ansible.builtin.command: fc-cache -fv

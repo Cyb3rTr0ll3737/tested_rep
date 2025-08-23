@@ -1,0 +1,15 @@
+---
+- name: Плейбук для управления юзерами
+  hosts: localhost
+  become: true
+  roles:
+    - useradd
+    - base_packages
+    - zsh_install
+    - sshd_config
+    - nginx
+    - static_deploy
+
+  tasks:
+    - name: Ping
+      ansible.builtin.ping:

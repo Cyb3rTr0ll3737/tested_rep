@@ -1,0 +1,23 @@
+---
+- name: Ставим Nginx
+  become: true
+  ansible.builtin.package:
+    name: nginx
+    state: present
+
+- name: Копируем конфиг сайта
+  ansible.builtin.template:
+    src: vhost.j2
+    dest: /etc/nginx/conf.d/{{ nginx_vars.nginx_site }}.conf
+
+- name: Проверяем конфиг
+  become: true
+  ansible.builtin.shell: nginx -t
+  register: nginx_check
+  failed_when: nginx_check.rc != 0
+
+- name: Ребутаем нжинкс
+  become: true
+  ansible.builtin.service:
+    name: nginx
+    state: restarted

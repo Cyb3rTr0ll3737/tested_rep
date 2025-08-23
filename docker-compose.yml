@@ -1,0 +1,11 @@
+services:
+  ubuntu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      TZ: ${TZ:-Europe/Moscow}
+    entrypoint: ["/usr/sbin/sshd","-D"]
+    ports:
+    - 22:22
+    - 80:80

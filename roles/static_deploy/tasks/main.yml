@@ -1,0 +1,9 @@
+---
+- name: Закидываем файлы на сервер
+  ansible.builtin.copy:
+    src: roles/static_deploy/files/static/
+    dest: /var/www/html/images
+    owner: www-data
+    group: www-data
+    mode: '0644'
+    remote_src: false

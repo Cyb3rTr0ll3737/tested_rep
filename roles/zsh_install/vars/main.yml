@@ -1,0 +1,4 @@
+---
+zsh_install_vars:
+  ohmyzsh_repo: https://github.com/ohmyzsh/ohmyzsh.git
+  powerlevel10_repo: https://github.com/romkatv/powerlevel10k.git

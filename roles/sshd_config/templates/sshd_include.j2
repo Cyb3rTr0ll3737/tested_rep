@@ -1,0 +1,5 @@
+# Ansible managed File
+PermitRootLogin {{ sshd_config_vars.ssh_permit_root | default('no')}}
+PermitEmptyPasswords {{ sshd_config_vars.ssh_empty_passwords | default('no')}}
+LogLevel {{ sshd_config_vars.ssh_loglevel | default('VERBOSE')}}
+X11Forwarding {{ sshd_config_vars.ssh_x11 | default('no')}}

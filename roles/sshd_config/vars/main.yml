@@ -1,0 +1,6 @@
+---
+sshd_config_vars:
+  ssh_permit_root: "no"
+  ssh_empty_passwords: "no"
+  ssh_loglevel: "VERBOSE"
+  ssh_x11: "no"
