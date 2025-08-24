@@ -9,7 +9,3 @@
     - sshd_config
     - nginx
     - static_deploy
-
-  tasks:
-    - name: Ping
-      ansible.builtin.ping:

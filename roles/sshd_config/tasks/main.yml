@@ -1,5 +1,5 @@
 ---
-- name: Подкидываем файл в /etc/ssh/sshd_config.d/ с нужными нам запретами
+- name: Подкидываем файл с нужными нам запретами в /etc/ssh/sshd_config.d/
   become: true
   ansible.builtin.template:
     src: sshd_include.j2
@@ -8,9 +8,8 @@
     group: root
     mode: '0600'
 
-# Рестартить не буду, по причине того, что контейнер умрёт
-# - name: Перезапуск sshd
-#   become: true
-#   ansible.builtin.service:
-#     name: ssh
-#     state: restarted
+- name: Перечитываем конфиг sshd
+  become: true
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
