@@ -1,0 +1,15 @@
+- name: Проверяем конфиг nginx
+  listen: "Check and reload nginx"
+  become: true
+  ansible.builtin.command: nginx -t
+  register: nginx_check
+  failed_when: nginx_check.rc != 0
+  changed_when: false
+
+- name: Релоадим nginx
+  listen: "Check and reload nginx"
+  become: true
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
+  changed_when: false

@@ -1,20 +1,29 @@
 ---
-- name: Получаем всех пользователей системы
-  ansible.builtin.shell: "getent passwd"
+- name: Получаем данные про всех пользователей системы
+  become: true
+  ansible.builtin.getent:
+    database: passwd
   register: passwd_output
-  changed_when: false
+
+- name: Инициализируем пустой список пользователей
+  ansible.builtin.set_fact:
+    all_users: []
 
 - name: Превращаем в список словарей
   ansible.builtin.set_fact:
-    all_users: >-
-      {{
-        passwd_output.stdout_lines
-        | map('split', ':')
-        | map('zip', ['name','x','uid','gid','gcos','dir','shell'])
-        | map('map', 'reverse')
-        | map('community.general.dict')
-        | list
-      }}
+    all_users:
+      "{{ all_users +
+        [{
+            'name': item.key,
+            'x': item.value[0],
+            'uid': item.value[1],
+            'gid': item.value[2],
+            'gcos': item.value[3],
+            'dir': item.value[4],
+            'shell': item.value[5]
+          }]
+        }}"
+  loop: "{{ passwd_output.ansible_facts.getent_passwd | dict2items }}"
 
 - name: Фильтруем пользователей, которые используют zsh
   ansible.builtin.set_fact:
@@ -69,11 +78,13 @@
 - name: Устанавливаем права на директорию oh-my-zsh для юзеров
   become: true
   ansible.builtin.file:
-    path: "{{ item.dir }}/.oh-my-zsh"
-    owner: "{{ item.name }}"
-    group: "{{ item.name }}"
+    path: "{{ item.item.dir }}/.oh-my-zsh"
+    owner: "{{ item.item.name }}"
+    group: "{{ item.item.name }}"
     recurse: true
-  loop: "{{ zsh_users }}"
+  loop: "{{ ohmyzsh_stat.results | selectattr('stat.exists', 'equalto', false) | list }}"
+  loop_control:
+    label: "{{ item.item.name }}"
 
 - name: Создаём директорию для кастомных шрифтов
   become: true
@@ -93,7 +104,4 @@
     - { url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf", filename: "MesloLGSNF-Bold.ttf"}
     - { url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf", filename: "MesloLGSNF-Italic.ttf"}
     - { url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf", filename: "MesloLGSNF-BoldItalic.ttf"}
-
-- name: Обновляем шрифты
-  become: true
-  ansible.builtin.command: fc-cache -fv
+  notify: "Refresh font cache"

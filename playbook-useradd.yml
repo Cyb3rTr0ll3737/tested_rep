@@ -3,9 +3,9 @@
   hosts: localhost
   become: true
   roles:
-    - useradd
-    - base_packages
+    # - useradd
+    # - base_packages
     - zsh_install
-    - sshd_config
-    - nginx
-    - static_deploy
+    # - sshd_config
+    # - nginx
+    # - static_deploy

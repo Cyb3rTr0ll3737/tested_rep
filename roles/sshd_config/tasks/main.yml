@@ -7,9 +7,4 @@
     owner: root
     group: root
     mode: '0600'
-
-- name: Перечитываем конфиг sshd
-  become: true
-  ansible.builtin.service:
-    name: ssh
-    state: reloaded
+  notify: "Reload sshd"
